@@ -35,7 +35,7 @@ def main():
     playerClicks = []  #keep track of player clicks (two tuples: [(6,4),(4,4)])
     gameOver = False
     playerOne = True # If a human is playing white, then this will be true. If an AI is playing, then its false
-    playerTwo = True # Same as above but for black
+    playerTwo = False # Same as above but for black
     while running:
         humanTurn = (gs.whiteToMove and playerOne) or (not gs.whiteToMove and playerTwo)
         for e in p.event.get():
@@ -53,9 +53,8 @@ def main():
                     else:
                         sqSelected = (row,col)
                         playerClicks.append(sqSelected)
-                    if len(playerClicks) == 2:  # after 2nd click
+                    if len(playerClicks) == 2 and humanTurn:  # after 2nd click
                         move = ChessEngine.Move(playerClicks[0],playerClicks[1], gs.board)
-                        print(move.getChessNotation())
                         for i in range(len(validMoves)):
                             if move == validMoves[i]:
                                 gs.makeMove(validMoves[i])
@@ -71,8 +70,10 @@ def main():
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z:  # Undo when 'z' is pressed
                     gs.undoMove()
+                    gs.undoMove()
                     moveMade = True
                     animate = False
+                    gameOver = False
                 if e.key == p.K_r:
                     gs = ChessEngine.GameState()
                     validMoves = gs.getValidMoves()
@@ -80,10 +81,13 @@ def main():
                     playerClicks = []
                     moveMade = False
                     animate = False
+                    gameOver = False
 
         #AI move finder
         if not gameOver and not humanTurn:
-            AIMove = ChessAI.findRandomMove(validMoves)
+            AIMove = ChessAI.findBestMove(gs, validMoves)
+            if AIMove is None:
+                AIMove = ChessAI.findRandomMove(validMoves)
             gs.makeMove(AIMove)
             moveMade = True
             animate = True
@@ -93,6 +97,7 @@ def main():
                 animateMove(gs.moveLog[-1], screen, gs.board, clock)
             validMoves = gs.getValidMoves()
             moveMade = False
+            animate = False
 
         drawGameState(screen, gs, validMoves, sqSelected)
 

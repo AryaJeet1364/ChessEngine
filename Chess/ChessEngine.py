@@ -70,8 +70,7 @@ class GameState():
 
         # update castling rights
         self.updateCastleRights(move)
-        self.castleRightsLog.append(CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks,
-                                             self.currentCastlingRight.wqs, self.currentCastlingRight.bqs))
+        self.castleRightsLog.append(CastleRights(self.currentCastlingRight.wks, self.currentCastlingRight.bks, self.currentCastlingRight.wqs, self.currentCastlingRight.bqs))
 
 
     # Undo the last move
@@ -96,7 +95,7 @@ class GameState():
                 self.enpassantPossible = ()
             # undo castling rights
             self.castleRightsLog.pop()  # get rid of the new castle rights of the move we are undoing
-            self.currentCastlingRight = self.castleRightsLog[-1]  # set the current castle rights to the last one in the list
+            self.currentCastlingRight = self.castleRightsLog[-1] # set the current castle rights to the last one in the list
             # undo castle move
             if move.isCastleMove:
                 if move.endCol - move.startCol == 2:
@@ -106,7 +105,8 @@ class GameState():
                     self.board[move.endRow][move.endCol - 2] = self.board[move.endRow][move.endCol + 1]
                     self.board[move.endRow][move.endCol + 1] = '--'
 
-
+            self.checkMate = False
+            self.staleMate = False
 
     # All moves considering checks
 
@@ -190,15 +190,17 @@ class GameState():
     def updateCastleRights(self, move):
 
         if move.pieceCaptured == "wR":
-            if move.endCol == 0:  # left rook
-                self.currentCastlingRight.wqs = False
-            elif move.endCol == 7:  # right rook
-                self.currentCastlingRight.wks = False
+            if move.endRow == 7:
+                if move.endCol == 0:  # left rook
+                    self.currentCastlingRight.wqs = False
+                elif move.endCol == 7:  # right rook
+                    self.currentCastlingRight.wks = False
         elif move.pieceCaptured == "bR":
-            if move.endCol == 0:  # left rook
-                self.currentCastlingRight.bqs = False
-            elif move.endCol == 7:  # right rook
-                self.currentCastlingRight.bks = False
+            if move.endRow == 0:
+                if move.endCol == 0:  # left rook
+                    self.currentCastlingRight.bqs = False
+                elif move.endCol == 7:  # right rook
+                    self.currentCastlingRight.bks = False
 
         if move.pieceMoved == 'wK':
             self.currentCastlingRight.wks = False
